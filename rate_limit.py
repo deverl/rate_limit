@@ -23,20 +23,24 @@ def unixTime() -> int:
 
 def rateLimit(key:str, interval:int, maxCount:int) -> bool:
     t = unixTime()
-    if key in cache.keys():
+    try:
         e = cache[key]
         if t >= e.endTime:
+            # Case 4
             e.endTime = t + interval
             e.count = 1
             cache[key] = e
             return False
         if e.count >= maxCount:
+            # Case 3
             return True
         else:
+            # Case 2
             e.count += 1
             cache[key] = e
             return False
-    else:
+    except:
+        # Case 1
         e = Entry(t + interval, 1)
         cache[key] = e
         return False
