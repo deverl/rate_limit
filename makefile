@@ -1,5 +1,6 @@
 
-all : limitc limitcpp limitgo rate_limit.jar
+# all : limitc limitcpp limitgo limitjava
+all : limitcpp limitgo limitjava
 
 .PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo
 
@@ -30,12 +31,13 @@ rate_limit.jar: RateLimit.java makefile
 	rm -f MainClass.txt *.class
 
 
-runall: runc runcpp rungo runjava runjs runlua runphp runpy
+# runall: runc runcpp rungo runjava runjs runlua runphp runpy
+runall: runcpp rungo runjava runpy
 
 
 
-runc: limitc makefile
-	./limitc
+# runc: limitc makefile
+# 	./limitc
 
 
 runcpp: limitcpp makefile
@@ -50,8 +52,8 @@ runjava: limitjava
 	./limitjava
 
 
-runlua:
-	lua rate_limit.lua
+# runlua:
+# 	lua rate_limit.lua
 
 
 runpython:
@@ -60,14 +62,14 @@ runpython:
 runpy: runpython
 
 
-runjavascript:
-	node rate_limit.js
+# runjavascript:
+# 	node rate_limit.js
 
-runjs: runjavascript
+# runjs: runjavascript
 
 
-runphp:
-	php rate_limit.php
+# runphp:
+# 	php rate_limit.php
 
 
 clean:
