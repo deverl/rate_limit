@@ -22,22 +22,21 @@ var cache map[string]entry
 func main() {
 	cache = make(map[string]entry)
 
-	exercise(5, 2, 120)
+	exerciseRateLimiter(5, 2, 120)
 
 	fmt.Println("")
 }
 
-func exercise(count int, interval int, maxCount int) {
+func exerciseRateLimiter(count int, interval int, maxCount int) {
 	for i := 0; i < count; i++ {
 		for {
-			fmt.Print(".")
 			shouldLimit := rateLimit("device_info", interval, maxCount)
-			// fmt.Println("shouldLimit:", shouldLimit)
 			if shouldLimit {
+				// Rate limited
 				fmt.Println("")
 				if i < count-1 {
 					for {
-						time.Sleep(2 * time.Millisecond)
+						time.Sleep(5 * time.Millisecond)
 						shouldLimit = rateLimit("device_info", interval, maxCount)
 						if !shouldLimit {
 							fmt.Print(".")
@@ -46,6 +45,9 @@ func exercise(count int, interval int, maxCount int) {
 					}
 				}
 				break
+			} else {
+				// Not rate limited.
+				fmt.Print(".")
 			}
 		}
 	}
