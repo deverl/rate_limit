@@ -2,7 +2,7 @@
 // 4 cases
 //   1: key not in cache (create new entry, count = 1, return false)
 //   2: key in cache, not expired, count < max (increment count, return false)
-//   3. key in cache, not expired, count >= max (increment count, return true)
+//   3. key in cache, not expired, count >= max (return true)
 //   4. key in cache, expired (create new entry, count = 1, return false)
 
 #include <iostream>
@@ -42,7 +42,6 @@ public:
             else
             {
                 // Case 3
-                entry.second++;
                 return true;
             }
         }

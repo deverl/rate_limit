@@ -7,6 +7,13 @@ package main
 //   3. key in cache, not expired, count >= max (increment count, return true)
 //   4. key in cache, expired (create new entry, count = 1, return false)
 
+//  case   cached    expired    count < max    count >= max   actions
+//  ----   ------    -------    -----------    ------------   -----------------------------------------
+//  1      no        --           --             --           create new entry, count = 1, return false
+//  2      yes       no           yes            no           increment count, return false
+//  3      yes       no           no             yes          increment count, return true
+//  4      yes       yes          --             --           create new entry, count = 1, return false
+
 import (
 	"fmt"
 	"os"
@@ -24,7 +31,8 @@ func main() {
 	cache = make(map[string]entry)
 
 	if len(os.Args) == 2 && os.Args[1] == "test" {
-		exerciseRateLimiter(5, 2, 120)
+		key := "216.239.34.21:/api/v1/payroll_report"
+		exerciseRateLimiter(key, 5, 2, 120)
 		fmt.Println("")
 	} else {
 		key := "192.168.4.127:/api/v1/users"
@@ -38,17 +46,17 @@ func main() {
 	}
 }
 
-func exerciseRateLimiter(count int, interval int, maxCount int) {
+func exerciseRateLimiter(key string, count int, interval int, maxCount int) {
 	for i := 0; i < count; i++ {
 		for {
-			shouldLimit := rateLimit("device_info", interval, maxCount)
+			shouldLimit := rateLimit(key, interval, maxCount)
 			if shouldLimit {
 				// Rate limited
 				fmt.Println("")
 				if i < count-1 {
 					for {
 						time.Sleep(5 * time.Millisecond)
-						shouldLimit = rateLimit("device_info", interval, maxCount)
+						shouldLimit = rateLimit(key, interval, maxCount)
 						if !shouldLimit {
 							fmt.Print(".")
 							break
