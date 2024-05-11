@@ -32,7 +32,7 @@ rate_limit.jar: RateLimit.java makefile
 
 
 # runall: runc runcpp rungo runjava runjs runlua runphp runpy
-runall: runcpp rungo runjava runpy
+runall: runcpp rungo runjava runpy runjs runphp
 
 
 
@@ -62,14 +62,14 @@ runpython:
 runpy: runpython
 
 
-# runjavascript:
-# 	node rate_limit.js
+runjavascript:
+	node rate_limit.js
 
-# runjs: runjavascript
+runjs: runjavascript
 
 
-# runphp:
-# 	php rate_limit.php
+runphp:
+	php rate_limit.php
 
 
 clean:
