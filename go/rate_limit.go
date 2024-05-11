@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -22,9 +23,19 @@ var cache map[string]entry
 func main() {
 	cache = make(map[string]entry)
 
-	exerciseRateLimiter(5, 2, 120)
+	if len(os.Args) == 2 && os.Args[1] == "test" {
+		exerciseRateLimiter(5, 2, 120)
+		fmt.Println("")
+	} else {
+		key := "192.168.4.127:/api/v1/users"
+		// false
+		fmt.Println(rateLimit(key, 5, 3))
+		fmt.Println(rateLimit(key, 5, 3))
+		fmt.Println(rateLimit(key, 5, 3))
 
-	fmt.Println("")
+		// true
+		fmt.Println(rateLimit(key, 5, 3))
+	}
 }
 
 func exerciseRateLimiter(count int, interval int, maxCount int) {
@@ -56,26 +67,29 @@ func exerciseRateLimiter(count int, interval int, maxCount int) {
 func rateLimit(key string, interval int, maxCount int) bool {
 	t := int(time.Now().Unix())
 	e, ok := cache[key]
-	if ok {
-		// Key in cache
-		if t >= e.endTime {
-			// Case 4
-			cache[key] = entry{endTime: t + interval, counter: 1}
-			return false
-		} else {
-			if e.counter >= maxCount {
-				// Case 3
-				return true
-			} else {
-				// Case 2
-				e.counter++
-				cache[key] = e
-				return false
-			}
-		}
-	} else {
+
+	if !ok {
 		// Case 1
 		cache[key] = entry{endTime: t + interval, counter: 1}
 		return false
 	}
+
+	if t < e.endTime {
+		// Not expired.
+		if e.counter < maxCount {
+			// Case 2
+			e.counter++
+			cache[key] = e
+			return false
+		}
+
+		// Case 3
+		return true
+	}
+
+	// Case 4
+	e.endTime = t + interval
+	e.counter = 1
+	cache[key] = e
+	return false
 }

@@ -1,2 +1,8 @@
 .DS_Store
+limitc
+limitcpp
+limitgo
+limitjava
+a.out
+*.o
 
