@@ -55,7 +55,7 @@ func exerciseRateLimiter(key string, count int, interval int, maxCount int) {
 				fmt.Println("")
 				if i < count-1 {
 					for {
-						time.Sleep(5 * time.Millisecond)
+						time.Sleep(10 * time.Millisecond)
 						shouldLimit = rateLimit(key, interval, maxCount)
 						if !shouldLimit {
 							fmt.Print(".")
