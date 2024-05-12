@@ -5,7 +5,7 @@ import java.util.*;
 // 4 cases
 //   1: key not in cache (create new entry, count = 1, return false)
 //   2: key in cache, not expired, count < max (increment count, return false)
-//   3. key in cache, not expired, count >= max (increment count, return true)
+//   3. key in cache, not expired, count >= max (return true)
 //   4. key in cache, expired (create new entry, count = 1, return false)
 
 class RateLimit {
