@@ -19,12 +19,12 @@ limitgo: go/rate_limit.go makefile
 	cd go ; go build -o limitgo ; mv limitgo ..
 
 
-limitjava : rate_limit.jar
+limitjava : RateLimit.jar makefile
 	@echo '#!/bin/bash' > limitjava
 	@echo 'java -jar RateLimit.jar' >> limitjava
 	@chmod a+x limitjava
 
-rate_limit.jar: RateLimit.java makefile
+RateLimit.jar: RateLimit.java makefile
 	javac RateLimit.java
 	echo "Main-Class: RateLimit" > MainClass.txt
 	jar cmfv MainClass.txt RateLimit.jar *.class
