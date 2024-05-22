@@ -21,7 +21,7 @@ limitgo: go/rate_limit.go makefile
 
 limitjava : RateLimit.jar makefile
 	@echo '#!/bin/bash' > limitjava
-	@echo 'java -jar RateLimit.jar' >> limitjava
+	@echo 'java -jar RateLimit.jar "$$@"' >> limitjava
 	@chmod a+x limitjava
 
 RateLimit.jar: RateLimit.java makefile
