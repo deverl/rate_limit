@@ -30,7 +30,14 @@ RateLimit.jar: RateLimit.java makefile
 	jar cmfv MainClass.txt RateLimit.jar *.class
 	rm -f MainClass.txt *.class
 
+limitkt.jar: kotlin/main.kt kotlin/RateLimit.kt kotlin/cache/Cache.kt kotlin/cache/CacheEntry.kt makefile
+	cd kotlin ; kotlinc *.kt cache/*.kt -d ../limitkt.jar
 
+limitkt: limitkt.jar
+	@echo '#!/bin/bash' > limitkt
+	@echo 'java -jar limitkt.jar "$$@"' >> limitkt
+	@chmod a+x limitkt
+	
 # runall: runc runcpp rungo runjava runjs runlua runphp runpy
 runall: runcpp rungo runjava runjs runlua runphp runpy
 
@@ -51,6 +58,9 @@ rungo: limitgo makefile
 runjava: limitjava
 	./limitjava
 
+
+runkt: limitkt
+	./limitkt
 
 runlua:
 	lua rate_limit.lua
@@ -73,6 +83,6 @@ runphp:
 
 
 clean:
-	rm -rf limitc limitcpp limitgo *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava
+	rm -rf limitc limitcpp limitgo limitkt *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava kotlin/*.class kotlin/cache/*.class kotlin/META-INF
 
 
