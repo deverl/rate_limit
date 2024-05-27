@@ -31,13 +31,13 @@ RateLimit.jar: RateLimit.java makefile
 	rm -f MainClass.txt *.class
 
 limitkt.jar: kotlin/main.kt kotlin/RateLimit.kt kotlin/cache/Cache.kt kotlin/cache/CacheEntry.kt makefile
-	cd kotlin ; kotlinc *.kt cache/*.kt -d ../limitkt.jar
+	cd kotlin ; kotlinc -include-runtime *.kt cache/*.kt -d ../limitkt.jar
 
 limitkt: limitkt.jar
 	@echo '#!/bin/bash' > limitkt
 	@echo 'java -jar limitkt.jar "$$@"' >> limitkt
 	@chmod a+x limitkt
-	
+
 # runall: runc runcpp rungo runjava runjs runlua runphp runpy
 runall: runcpp rungo runjava runjs runlua runphp runpy
 
