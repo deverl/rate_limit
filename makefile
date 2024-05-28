@@ -83,6 +83,6 @@ runphp:
 
 
 clean:
-	rm -rf limitc limitcpp limitgo limitkt *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava kotlin/*.class kotlin/cache/*.class kotlin/META-INF
+	rm -rf limitc limitcpp limitgo limitkt *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava kotlin/*.class kotlin/cache/*.class kotlin/META-INF rate_limit.iml
 
 
