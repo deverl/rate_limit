@@ -20,7 +20,7 @@ limitgo: go/rate_limit.go makefile
 
 
 limitjava : RateLimit.jar makefile
-	@echo '#!/bin/bash' > limitjava
+	@echo '#!/usr/bin/env bash' > limitjava
 	@echo 'java -jar RateLimit.jar "$$@"' >> limitjava
 	@chmod a+x limitjava
 
@@ -34,7 +34,7 @@ limitkt.jar: kotlin/main.kt kotlin/RateLimit.kt kotlin/cache/Cache.kt kotlin/cac
 	cd kotlin ; kotlinc -include-runtime *.kt cache/*.kt -d ../limitkt.jar
 
 limitkt: limitkt.jar
-	@echo '#!/bin/bash' > limitkt
+	@echo '#!/usr/bin/env bash' > limitkt
 	@echo 'java -jar limitkt.jar "$$@"' >> limitkt
 	@chmod a+x limitkt
 
