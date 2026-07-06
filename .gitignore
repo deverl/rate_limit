@@ -1,10 +1,12 @@
 .DS_Store
 limitc
 limitcpp
+limitfortran
 limitgo
 limitjava
 a.out
 *.o
+*.mod
 RateLimit.jar
 .idea
 out/

@@ -1,7 +1,11 @@
 
-all : limitc limitcpp limitgo limitjava limitrust
+# Not all systems have a Fortran compiler; skip the Fortran version
+# unless flang is on the PATH.
+FLANG := $(shell command -v flang 2> /dev/null)
 
-.PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo runrust runc
+all : limitc limitcpp limitgo limitjava limitrust $(if $(FLANG),limitfortran)
+
+.PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo runrust runc runfortran
 
 
 limitc : rate_limit.c makefile
@@ -41,7 +45,12 @@ limitkt: limitkt.jar
 	@echo 'java -jar limitkt.jar "$$@"' >> limitkt
 	@chmod a+x limitkt
 
-runall: runc runcpp rungo runjava runjs runlua runphp runpy runrust
+limitfortran : rate_limit.f90 makefile
+	flang -O2 -o limitfortran rate_limit.f90
+	strip limitfortran
+
+
+runall: runc runcpp runfortran rungo runjava runjs runlua runphp runpy runrust
 
 
 
@@ -51,6 +60,15 @@ runc: limitc makefile
 
 runcpp: limitcpp makefile
 	./limitcpp
+
+
+ifdef FLANG
+runfortran: limitfortran makefile
+	./limitfortran
+else
+runfortran:
+	@echo "flang not found; skipping Fortran version"
+endif
 
 
 rungo: limitgo makefile
@@ -93,6 +111,6 @@ runphp:
 
 
 clean:
-	rm -rf limitc limitcpp limitgo limitkt limitrust rust/target *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava kotlin/*.class kotlin/cache/*.class kotlin/META-INF rate_limit.iml
+	rm -rf limitc limitcpp limitfortran *.mod limitgo limitkt limitrust rust/target *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava kotlin/*.class kotlin/cache/*.class kotlin/META-INF rate_limit.iml
 
 
