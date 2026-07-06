@@ -3,9 +3,9 @@
 # unless flang is on the PATH.
 FLANG := $(shell command -v flang 2> /dev/null)
 
-all : limitc limitcpp limitgo limitjava limitrust $(if $(FLANG),limitfortran)
+all : limitc limitcpp limitgo limitjava limitkt limitrust $(if $(FLANG),limitfortran)
 
-.PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo runrust runc runfortran
+.PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo runrust runc runfortran runkotlin runkt
 
 
 limitc : rate_limit.c makefile
@@ -50,7 +50,7 @@ limitfortran : rate_limit.f90 makefile
 	strip limitfortran
 
 
-runall: runc runcpp runfortran rungo runjava runjs runlua runphp runpy runrust
+runall: runc runcpp runfortran rungo runjava runjs runkotlin runlua runphp runpy runrust
 
 
 
@@ -87,8 +87,10 @@ testrust:
 	cd rust ; cargo test
 
 
-runkt: limitkt
+runkotlin: limitkt
 	./limitkt
+
+runkt: runkotlin
 
 runlua:
 	lua rate_limit.lua
