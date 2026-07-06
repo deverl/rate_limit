@@ -8,12 +8,33 @@
 
 cache = {};
 
-function unixTime() {
-    return Math.floor(Date.now() / 1000);
+// Sweep expired entries every Nth rateLimit call so stale keys
+// don't accumulate forever.
+const EVICT_EVERY = 100;
+let callCount = 0;
+
+// Monotonic clock (seconds). Unlike Date.now(), performance.now() is not
+// affected by system clock adjustments, and it has sub-second precision.
+function monotonicTime() {
+    return performance.now() / 1000;
+}
+
+function evictExpired() {
+    const t = monotonicTime();
+    for (const key of Object.keys(cache)) {
+        if (t >= cache[key].endTime) {
+            delete cache[key];
+        }
+    }
 }
 
 function rateLimit(key, interval, maxCount) {
-    const t = unixTime;
+    callCount += 1;
+    if (callCount % EVICT_EVERY === 0) {
+        evictExpired();
+    }
+
+    const t = monotonicTime();
     let e = cache[key];
     if (!e) {
         // No cached entry for the key.
@@ -29,7 +50,6 @@ function rateLimit(key, interval, maxCount) {
             // Not expired and the count has not reached the max.
             // Case 2
             e.count += 1;
-            cache[key] = e;
             return false;
         }
 
@@ -42,7 +62,6 @@ function rateLimit(key, interval, maxCount) {
     // Case 4
     e.endTime = t + interval;
     e.count = 1;
-    cache[key] = e;
     return false;
 }
 
@@ -55,7 +74,7 @@ function runTest(key, interval, maxCount) {
 
     // true
     console.log(`rateLimit(${key}, ${interval}, ${maxCount}) => ${rateLimit(key, interval, maxCount)}`);
-}   
+}
 
 
 

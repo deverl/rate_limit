@@ -11,3 +11,6 @@ out/
 rate_limit.iml
 limitkt
 limitkt.jar
+limitrust
+rust/target/
+rust/Cargo.lock

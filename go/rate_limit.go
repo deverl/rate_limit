@@ -21,11 +21,17 @@ import (
 )
 
 type entry struct {
-	endTime int // Window end time
-	counter int // Counter
+	endTime time.Time // Window end time
+	counter int       // Counter
 }
 
 var cache map[string]entry
+
+// Sweep expired entries every Nth rateLimit call so stale keys
+// don't accumulate forever.
+const evictEvery = 100
+
+var callCount int
 
 func main() {
 	cache = make(map[string]entry)
@@ -72,17 +78,33 @@ func exerciseRateLimiter(key string, count int, interval int, maxCount int) {
 	}
 }
 
+func evictExpired() {
+	t := time.Now()
+	for key, e := range cache {
+		if !t.Before(e.endTime) {
+			delete(cache, key)
+		}
+	}
+}
+
 func rateLimit(key string, interval int, maxCount int) bool {
-	t := int(time.Now().Unix())
+	callCount++
+	if callCount%evictEvery == 0 {
+		evictExpired()
+	}
+
+	// time.Now carries a monotonic clock reading, so comparisons are
+	// unaffected by system clock adjustments.
+	t := time.Now()
 	e, ok := cache[key]
 
 	if !ok {
 		// Case 1
-		cache[key] = entry{endTime: t + interval, counter: 1}
+		cache[key] = entry{endTime: t.Add(time.Duration(interval) * time.Second), counter: 1}
 		return false
 	}
 
-	if t < e.endTime {
+	if t.Before(e.endTime) {
 		// Not expired.
 		if e.counter < maxCount {
 			// Case 2
@@ -96,7 +118,7 @@ func rateLimit(key string, interval int, maxCount int) bool {
 	}
 
 	// Case 4
-	e.endTime = t + interval
+	e.endTime = t.Add(time.Duration(interval) * time.Second)
 	e.counter = 1
 	cache[key] = e
 	return false

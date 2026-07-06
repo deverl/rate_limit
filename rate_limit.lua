@@ -10,13 +10,35 @@ Should rate limit
 
 cache = {}
 
+-- Sweep expired entries every Nth rateLimit call so stale keys
+-- don't accumulate forever.
+EVICT_EVERY = 100
+callCount = 0
+
 
 function unixTime()
+    -- Note: standard Lua has no monotonic wall clock, so this uses
+    -- os.time() (whole seconds, affected by system clock adjustments).
     return os.time(os.date("!*t"))
 end
 
 
+function evictExpired()
+    local t = unixTime()
+    for key, e in pairs(cache) do
+        if t >= e.endTime then
+            cache[key] = nil
+        end
+    end
+end
+
+
 function rateLimit(key, interval, maxCount)
+    callCount = callCount + 1
+    if callCount % EVICT_EVERY == 0 then
+        evictExpired()
+    end
+
     local t = unixTime()
     local e = cache[key]
     if e == nil then
@@ -33,7 +55,6 @@ function rateLimit(key, interval, maxCount)
             -- In cache, not expired, count < max
             -- Case 2
             e.count = e.count + 1
-            cache[key] = e
             return false
         end
 
@@ -44,7 +65,8 @@ function rateLimit(key, interval, maxCount)
 
     -- Expired
     -- Case 4
-    cache[key] = {endTime = t + interval, count = 1}
+    e.endTime = t + interval
+    e.count = 1
     return false
 end
 

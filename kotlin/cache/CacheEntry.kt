@@ -2,7 +2,6 @@ package cache
 
 class CacheEntry(var value: Long, var TTLms: Long = 5000L) {
     private var endTime: Long? = null
-    private var TTL: Long? = null
 
     fun hasExpired(): Boolean {
         val now = System.currentTimeMillis()

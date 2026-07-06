@@ -33,4 +33,9 @@ class Cache {
             return null
         }
     }
+
+    // Remove all expired entries so stale keys don't accumulate forever.
+    fun evictExpired() {
+        cache.values.removeIf { it.hasExpired() }
+    }
 }

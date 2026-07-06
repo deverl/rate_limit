@@ -9,7 +9,6 @@
 
 #include <unordered_map>
 #include <chrono>
-#include <ctime>
 
 using namespace std;
 
@@ -20,18 +19,23 @@ public:
 
     bool shouldRateLimit(const string& key)
     {
-        auto now = chrono::system_clock::now();
+        if(++callCount_ % kEvictEvery == 0)
+        {
+            evictExpired();
+        }
+
+        // steady_clock is monotonic: unaffected by system clock adjustments.
+        auto now = chrono::steady_clock::now();
         auto it = cache_.find(key);
         if(it == cache_.end())
         {
             // Case 1
-            cache_[key] = make_pair(now, 1);
+            cache_[key] = make_pair(now + chrono::seconds(duration_), 1);
             return false;
         }
 
         auto& entry = it->second;
-        auto elapsed = chrono::duration_cast<chrono::seconds>(now - entry.first).count();
-        if(elapsed < duration_)
+        if(now < entry.first)
         {
             if(entry.second < max_)
             {
@@ -48,14 +52,36 @@ public:
         else
         {
             // Case 4
-            cache_[key] = make_pair(now, 1);
+            entry.first = now + chrono::seconds(duration_);
+            entry.second = 1;
             return false;
         }
     }
 protected:
+    // Sweep expired entries every Nth call so stale keys
+    // don't accumulate forever.
+    static const int kEvictEvery = 100;
+
+    void evictExpired()
+    {
+        auto now = chrono::steady_clock::now();
+        for(auto it = cache_.begin(); it != cache_.end(); )
+        {
+            if(now >= it->second.first)
+            {
+                it = cache_.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
     int max_;
     int duration_;
-    unordered_map<string, pair<chrono::system_clock::time_point, int> > cache_;
+    long callCount_ = 0;
+    unordered_map<string, pair<chrono::steady_clock::time_point, int> > cache_;
 };
 
 
@@ -73,4 +99,3 @@ int main()
 
     return 0;
 }
-

@@ -11,10 +11,39 @@
 
 $cache = [];
 
+// Sweep expired entries every Nth rateLimit call so stale keys
+// don't accumulate forever.
+const EVICT_EVERY = 100;
+$callCount = 0;
+
+
+function monotonicTime() : float {
+    // Unlike time(), hrtime() is monotonic (unaffected by system clock
+    // adjustments) and has sub-second precision. Returns seconds.
+    return hrtime(true) / 1e9;
+}
+
+
+function evictExpired() : void {
+    global $cache;
+    $t = monotonicTime();
+    foreach ($cache as $key => $entry) {
+        if ($t >= $entry['end_time']) {
+            unset($cache[$key]);
+        }
+    }
+}
+
 
 function rateLimit(string $key, int $interval, int $maxCount) : bool {
-    global $cache;
-    $t = time();
+    global $cache, $callCount;
+
+    $callCount++;
+    if ($callCount % EVICT_EVERY === 0) {
+        evictExpired();
+    }
+
+    $t = monotonicTime();
     if (array_key_exists($key, $cache) === false) {
         // Not in cache.
         // Case 1

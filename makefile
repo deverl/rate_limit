@@ -1,12 +1,11 @@
 
-# all : limitc limitcpp limitgo limitjava
-all : limitcpp limitgo limitjava
+all : limitc limitcpp limitgo limitjava limitrust
 
-.PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo
+.PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo runrust runc
 
 
-limitc : freq_nums.c makefile
-	gcc -Wall -pedantic -O3 -o limitc freq_nums.c
+limitc : rate_limit.c makefile
+	gcc -Wall -pedantic -O3 -std=c11 -o limitc rate_limit.c
 	strip limitc
 
 
@@ -17,6 +16,10 @@ limitcpp : rate_limit.cpp makefile
 
 limitgo: go/rate_limit.go makefile
 	cd go ; go build -o limitgo ; mv limitgo ..
+
+
+limitrust: rust/src/main.rs rust/Cargo.toml makefile
+	cd rust ; cargo build --release ; cp "$${CARGO_TARGET_DIR:-target}/release/limitrust" ..
 
 
 limitjava : RateLimit.jar makefile
@@ -38,13 +41,12 @@ limitkt: limitkt.jar
 	@echo 'java -jar limitkt.jar "$$@"' >> limitkt
 	@chmod a+x limitkt
 
-# runall: runc runcpp rungo runjava runjs runlua runphp runpy
-runall: runcpp rungo runjava runjs runlua runphp runpy
+runall: runc runcpp rungo runjava runjs runlua runphp runpy runrust
 
 
 
-# runc: limitc makefile
-# 	./limitc
+runc: limitc makefile
+	./limitc
 
 
 runcpp: limitcpp makefile
@@ -57,6 +59,14 @@ rungo: limitgo makefile
 
 runjava: limitjava
 	./limitjava
+
+
+runrust: limitrust makefile
+	./limitrust
+
+
+testrust:
+	cd rust ; cargo test
 
 
 runkt: limitkt
@@ -83,6 +93,6 @@ runphp:
 
 
 clean:
-	rm -rf limitc limitcpp limitgo limitkt *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava kotlin/*.class kotlin/cache/*.class kotlin/META-INF rate_limit.iml
+	rm -rf limitc limitcpp limitgo limitkt limitrust rust/target *.jar MainClass.txt *.class *.tmp.html a.out *.dSYM limitjava kotlin/*.class kotlin/cache/*.class kotlin/META-INF rate_limit.iml
 
 
