@@ -3,18 +3,22 @@
 # unless flang is on the PATH.
 FLANG := $(shell command -v flang 2> /dev/null)
 
+CC := clang
+
+CPP := clang++
+
 all : limitc limitcpp limitgo limitjava limitkt limitrust $(if $(FLANG),limitfortran)
 
 .PHONY : clean runlua runpython runpy runjavascript runjs runphp rungo runrust runc runfortran runkotlin runkt
 
 
 limitc : rate_limit.c makefile
-	gcc -Wall -pedantic -O3 -std=c11 -o limitc rate_limit.c
+	$(CC) -Wall -pedantic -O3 -std=c11 -o limitc rate_limit.c
 	strip limitc
 
 
 limitcpp : rate_limit.cpp makefile
-	g++ -Wall -pedantic -O3 -std=c++11 -o limitcpp rate_limit.cpp
+	$(CPP) -Wall -pedantic -O3 -std=c++11 -o limitcpp rate_limit.cpp
 	strip limitcpp
 
 
